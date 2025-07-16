@@ -1,5 +1,12 @@
-import { Transform, Type } from "class-transformer";
-import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { Transform, Type } from 'class-transformer';
+import {
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
+import { BaseQueryDto } from 'src/common/base/base-query.dto';
 
 export enum ProductSortBy {
   NAME = 'name',
@@ -14,33 +21,20 @@ export enum SortOrder {
   DESC = 'DESC',
 }
 
-export class ProductQueryDto {
+export class ProductQueryDto extends BaseQueryDto {
   @IsOptional()
-  @Type(() => Number) // tranform the string to number
+  @Type(() => Number)
   @IsNumber()
-  @Min(1)
-  page?: number = 1;
+  categoryId?: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Min(1)
-  limit?: number = 10;
-
-  @IsOptional()
-  @IsString()
-  search?: string;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
   minPrice?: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Min(0)
   maxPrice?: number;
 
   @IsOptional()
@@ -49,24 +43,11 @@ export class ProductQueryDto {
   inStock?: boolean;
 
   @IsOptional()
-  @Transform(({ value }) => value === 'true')
-  @IsBoolean()
-  isActive?: boolean = true;
-
-  @IsOptional()
   @IsArray()
-  @IsString({ each: true })
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   tags?: string[];
 
   @IsOptional()
-  @IsEnum(ProductSortBy)
+  @IsIn(Object.values(ProductSortBy))
   sortBy?: ProductSortBy = ProductSortBy.CREATED_AT;
-
-  @IsOptional()
-  @IsEnum(SortOrder)
-  sortOrder?: SortOrder = SortOrder.DESC;
-
-  @IsOptional()
-  @IsNumber()
-  categoryId?: number;
 }

@@ -1,45 +1,48 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
-  Param,
   ParseIntPipe,
-  Post,
-  Put,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
+import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
+import { BaseController } from 'src/common/base/base.controller';
+import { Product } from './product.entity';
 
 @Controller('products')
-export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
-
-  @Post()
-  create(@Body() dto: CreateProductDto) {
-    return this.productsService.create(dto);
+@UseInterceptors(LoggingInterceptor)
+export class ProductsController extends BaseController<
+  Product,
+  CreateProductDto,
+  UpdateProductDto
+> {
+  constructor(private readonly productsService: ProductsService) {
+    super(productsService);
   }
 
+  // Override findAll to use ProductQueryDto instead of BaseQueryDto
   @Get()
-  findAll(@Query() query: ProductQueryDto) {
+  async findAll(@Query() query: ProductQueryDto) {
     return this.productsService.findAll(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.findOne(id);
+  @Get('popular')
+  async getPopular(
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
+  ): Promise<Product[]> {
+    return this.productsService.getPopularProducts(limit);
   }
 
-  @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateProductDto) {
-    return this.productsService.update(id, dto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.remove(id);
+  @Get('search-suggestions')
+  async getSearchSuggestions(
+    @Query('keyword') keyword: string,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 5,
+  ): Promise<string[]> {
+    return this.productsService.getSearchSuggestions(keyword, limit);
   }
 }
