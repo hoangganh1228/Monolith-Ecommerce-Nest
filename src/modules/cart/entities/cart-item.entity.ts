@@ -6,7 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from 'src/modules/users/user.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 import { Product } from 'src/modules/products/product.entity';
 
 @Entity('cart_items')
