@@ -1,37 +1,30 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  Index,
-} from 'typeorm';
+import { Entity, Column, Index } from 'typeorm';
+import { BaseEntity } from 'src/common/base/base.entity';
 
 @Entity('products')
-@Index(['categoryId', 'isActive'])
-@Index(['price', 'isActive'])
-export class Product {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+@Index(['categoryId', 'isActive']) // Composite index cho filter thường dùng
+@Index(['price', 'isActive']) // Composite index cho price range queries
+@Index(['viewCount', 'soldCount', 'isActive']) // Composite index cho popular products
+@Index(['createdAt', 'isActive']) // Composite index cho sorting by date
+export class Product extends BaseEntity {
   @Column()
-  @Index()
+  @Index() // Single index cho search by name
   name: string;
 
-  @Column()
+  @Column('text', { nullable: true })
   description: string;
 
-  @Column('decimal')
+  @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
   @Column('int', { default: 0 })
   stock: number;
 
-  @Column({ default: true })
-  @Index()
-  isActive: boolean;
-
   @Column({ nullable: true })
   categoryId: number;
+
+  @Column('simple-array', { nullable: true })
+  tags: string[];
 
   @Column({ default: 0 })
   viewCount: number;
@@ -42,9 +35,7 @@ export class Product {
   @Column({ nullable: true })
   imageUrl: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
+  // Computed properties
   get isInStock(): boolean {
     return this.stock > 0;
   }

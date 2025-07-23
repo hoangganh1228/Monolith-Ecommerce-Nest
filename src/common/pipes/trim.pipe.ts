@@ -1,8 +1,11 @@
-import { Injectable, PipeTransform } from '@nestjs/common';
+import { PipeTransform, Injectable } from '@nestjs/common';
 
 @Injectable()
-export class TrimPipe implements PipeTransform {
-  transform(value: string) {
-    return typeof value === 'string' ? value.trim() : value;
+export class RemoveAllSpacesPipe implements PipeTransform {
+  transform(value: any) {
+    if (typeof value === 'string') {
+      return value.replace(/\s+/g, ''); // loại bỏ mọi khoảng trắng
+    }
+    return value;
   }
 }

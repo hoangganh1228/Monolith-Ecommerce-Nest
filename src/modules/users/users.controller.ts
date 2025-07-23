@@ -18,6 +18,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('/profile')
+  @Roles('user', 'admin')
   getMe(@Request() req) {
     return this.usersService.findOne(req.user.id);
   }
