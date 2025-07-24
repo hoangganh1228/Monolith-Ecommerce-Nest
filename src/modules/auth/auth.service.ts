@@ -33,18 +33,25 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({
+      where: { email },
+      relations: ['userRoles', 'userRoles.role'],
+    });
+    
+    const role =  user!.userRoles[0].role || 'User'
+
     if (user && (await bcrypt.compare(password, user.password))) {
       const { password, ...result } = user;
 
-      return result;
+      return { ...result, role };
     }
     throw new UnauthorizedException('Email or password is incorrect.');
   }
 
   async login(user: any) {
     // Thêm parameter user
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = { email: user.email, sub: user.id, role: user.role.name };
+    
     return {
       access_token: this.jwtService.sign(payload),
     };

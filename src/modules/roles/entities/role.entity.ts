@@ -1,25 +1,16 @@
 import { UserRole } from "src/modules/users/entities/user-role.entity";
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {  Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { RolePermission } from "./role-permission.entity";
+import { BaseEntity } from "src/common/base/base.entity";
 
 @Entity('roles')
-export class Role {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class Role extends BaseEntity {
   @Column({ type: 'varchar', length: 50, unique: true })
   name: string;
 
   @Column({ type: 'text', nullable: true })
   description?: string;
 
-  @Column({ type: 'boolean', default: true })
-  isActive: boolean;
-
-  @CreateDateColumn({ type: 'timestamptz' })
-  createdAt: Date;
-
-  // Relations
   @OneToMany(() => UserRole, userRole => userRole.role)
   userRoles: UserRole[];
 
