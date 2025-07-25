@@ -2,10 +2,10 @@ import { Entity, Column, Index } from 'typeorm';
 import { BaseEntity } from 'src/common/base/base.entity';
 
 @Entity('products')
-@Index(['categoryId', 'isActive']) // Composite index cho filter thường dùng
-@Index(['price', 'isActive']) // Composite index cho price range queries
-@Index(['viewCount', 'soldCount', 'isActive']) // Composite index cho popular products
-@Index(['createdAt', 'isActive']) // Composite index cho sorting by date
+@Index(['categoryId', 'isDeleted']) // Composite index cho filter thường dùng
+@Index(['price', 'isDeleted']) // Composite index cho price range queries
+@Index(['viewCount', 'soldCount', 'isDeleted']) // Composite index cho popular products
+@Index(['createdAt', 'isDeleted']) // Composite index cho sorting by date
 export class Product extends BaseEntity {
   @Column()
   @Index() // Single index cho search by name
@@ -31,6 +31,9 @@ export class Product extends BaseEntity {
 
   @Column({ default: 0 })
   soldCount: number;
+
+  @Column({ default: true })
+  isActive: boolean;
 
   @Column({ nullable: true })
   imageUrl: string;

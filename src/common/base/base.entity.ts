@@ -11,7 +11,7 @@ export abstract class BaseEntity {
   id: number;
 
   @Column({ default: true })
-  isActive: boolean;
+  isDeleted: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -7,7 +7,7 @@ export class ProductResponseDto {
   imageUrl: string;
   categoryId: number;
   tags: string[];
-  isActive: boolean;
+  isDeleted: boolean;
   viewCount: number;
   soldCount: number;
   isInStock: boolean;

@@ -39,5 +39,9 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsBoolean()
-  isActive?: boolean = true;
+  isDeleted?: boolean = true;
+
+  @IsOptional()
+  @IsNumber()
+  stock?: number = 0;
 }

@@ -24,7 +24,7 @@ export class RolesService extends BaseService<Role>{
 
   async create(createRoleDto: CreateRoleDto) {
     const existingRole = await this.roleRepository.findOne({
-      where: { name: createRoleDto.name, isActive: true }
+      where: { name: createRoleDto.name, isDeleted: true }
     });
 
     if (existingRole) {
@@ -37,7 +37,7 @@ export class RolesService extends BaseService<Role>{
   async update(id: number, updateRoleDto: UpdateRoleDto) {
     if(updateRoleDto.name) {
       const existingRole = await this.roleRepository.findOne({
-        where: { name: updateRoleDto.name, isActive: true }
+        where: { name: updateRoleDto.name, isDeleted: true }
       });
       
       if (existingRole && existingRole.id !== id) {
@@ -146,7 +146,7 @@ export class RolesService extends BaseService<Role>{
 
   async findOneWithRelations(id: number) {
     const role = await this.roleRepository.findOne({
-      where: {id, isActive: true},
+      where: {id, isDeleted: true},
       relations: [
         'userRoles',
         'userRoles.user',

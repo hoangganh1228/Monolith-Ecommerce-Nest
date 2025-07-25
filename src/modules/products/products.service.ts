@@ -29,7 +29,7 @@ export class ProductsService extends BaseService<Product> {
       .createQueryBuilder('product')
       .select('DISTINCT product.name', 'name')
       .where('product.name ILIKE :keyword', { keyword: `%${keyword.trim()}%` })
-      .andWhere('product.isActive = :isActive', { isActive: true })
+      .andWhere('product.isDeleted = :isDeleted', { isDeleted: true })
       .orderBy('product.name', 'ASC')
       .limit(limit)
       .getRawMany();
@@ -40,7 +40,7 @@ export class ProductsService extends BaseService<Product> {
   async getPopularProducts(limit: number = 10): Promise<Product[]> {
     return this.productRepository
       .createQueryBuilder('product')
-      .where('product.isActive = :isActive', { isActive: true })
+      .where('product.isDeleted = :isDeleted', { isDeleted: true })
       .orderBy('product.viewCount', 'DESC')
       .addOrderBy('product.soldCount', 'DESC')
       .addOrderBy('product.createdAt', 'DESC')

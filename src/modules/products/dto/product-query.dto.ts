@@ -48,6 +48,11 @@ export class ProductQueryDto extends BaseQueryDto {
   tags?: string[];
 
   @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  isActive?: boolean;
+
+  @IsOptional()
   @IsIn(Object.values(ProductSortBy))
   sortBy?: ProductSortBy = ProductSortBy.CREATED_AT;
 }

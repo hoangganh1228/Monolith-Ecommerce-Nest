@@ -22,7 +22,7 @@ export abstract class BaseService<T extends BaseEntity> {
 
   async findOne(id: number): Promise<T> {
     const entity = await this.repository.findOne({
-      where: { isActive: true, id } as any,
+      where: { isDeleted: true, id } as any,
     });
 
     if (!entity)
@@ -72,7 +72,7 @@ export abstract class BaseService<T extends BaseEntity> {
   async remove(id: number): Promise<void> {
     await this.findOne(id);
 
-    await this.repository.update(id, { isActive: false } as any);
+    await this.repository.update(id, { isDeleted: false } as any);
   }
 
   async hardDelete(id: number): Promise<void> {
@@ -89,7 +89,7 @@ export abstract class BaseService<T extends BaseEntity> {
     const alias = this.getEntityAlias();
     const queryBuilder = this.repository.createQueryBuilder(alias);
 
-    queryBuilder.where(`${alias}.isActive = :isActive`, { isActive: true });
+    queryBuilder.where(`${alias}.isDeleted = :isDeleted`, { isDeleted: true });
 
     if (query.search) {
       this.applySearchFilter(queryBuilder, query.search.trim());
