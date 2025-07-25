@@ -31,7 +31,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles(RoleEnum.ADMIN)
+  @Roles(RoleEnum.ADMIN, RoleEnum.SHOPPER, RoleEnum.USER)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
   }

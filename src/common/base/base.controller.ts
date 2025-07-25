@@ -15,17 +15,18 @@ import {
 import { BaseQueryDto } from './base-query.dto';
 import { PaginationResponseDto } from '../dto/pagination-response.dto';
 import { BaseEntity } from './base.entity';
+import { DeepPartial } from 'typeorm';
 
 export abstract class BaseController<
   T extends BaseEntity,
-  CreateDto,
-  UpdateDto,
+  CreateDto extends DeepPartial<T>,
+  UpdateDto extends DeepPartial<T>,
 > {
   constructor(protected readonly service: BaseService<T>) {}
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateDto): Promise<T> {
-    return this.service.create(dto as any);
+    return this.service.create(dto);
   }
 
   @Get()

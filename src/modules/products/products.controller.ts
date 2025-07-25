@@ -4,6 +4,7 @@ import {
   Get,
   ParseIntPipe,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
@@ -13,8 +14,12 @@ import { ProductQueryDto } from './dto/product-query.dto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { BaseController } from 'src/common/base/base.controller';
 import { Product } from './product.entity';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('products')
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @UseInterceptors(LoggingInterceptor)
 export class ProductsController extends BaseController<
   Product,
@@ -24,7 +29,7 @@ export class ProductsController extends BaseController<
   constructor(private readonly productsService: ProductsService) {
     super(productsService);
   }
-
+  
   // Override findAll to use ProductQueryDto instead of BaseQueryDto
   @Get()
   async findAll(@Query() query: ProductQueryDto) {

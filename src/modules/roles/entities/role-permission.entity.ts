@@ -14,7 +14,7 @@ export class RolePermission {
   grantedAt: Date;
 
   @Column({ name: 'granted_by', type: 'bigint', nullable: true })
-  grantedBy?: string;
+  grantedBy?: number;
 
   // Relations
   @ManyToOne(() => Role, role => role.rolePermissions, { onDelete: 'CASCADE' })

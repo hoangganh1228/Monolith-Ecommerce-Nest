@@ -11,6 +11,9 @@ export class Permission extends BaseEntity {
   @Column({ type: 'varchar', length: 100, nullable: false })
   action: string;
 
+  @Column({ type: 'varchar', length: 200, unique: true })
+  code: string;
+
   @Column({ type: 'text', nullable: true })
   description?: string;
 

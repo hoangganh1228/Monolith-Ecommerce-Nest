@@ -7,11 +7,13 @@ import {
   IsUrl,
   IsBoolean,
   IsArray,
+  MinLength,
 } from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
+  @MinLength(1, { message: 'Name must be at least 1 character long' })
   name: string;
 
   @IsString()
