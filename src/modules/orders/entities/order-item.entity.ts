@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Order } from './order.entity';
-import { Product } from 'src/modules/products/product.entity';
+import { Product } from 'src/modules/products/dto/entitites/product.entity';
 import { IsOptional } from 'class-validator';
 
 @Entity('order_items')

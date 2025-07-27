@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Product } from '../products/product.entity';
+import { Product } from '../products/dto/entitites/product.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItem } from './entities/cart-item.entity';

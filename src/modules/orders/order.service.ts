@@ -8,7 +8,7 @@ import { Order, OrderStatus } from './entities/order.entity';
 import { DataSource, Repository } from 'typeorm';
 import { OrderItem } from './entities/order-item.entity';
 import { CartItem } from '../cart/entities/cart-item.entity';
-import { Product } from '../products/product.entity';
+import { Product } from '../products/dto/entitites/product.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 
 @Injectable()

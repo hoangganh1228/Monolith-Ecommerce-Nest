@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from "@nestjs/common";
+import {  Controller, Get, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { ProductQueryDto } from "../dto/product-query.dto";
 import { ProductsService } from "../products.service";
 

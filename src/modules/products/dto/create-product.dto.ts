@@ -1,3 +1,4 @@
+import { Transform, Type } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -16,10 +17,11 @@ export class CreateProductDto {
   @MinLength(1, { message: 'Name must be at least 1 character long' })
   name: string;
 
-  @IsString()
+  @IsString() 
   @IsNotEmpty()
   description: string;
-
+  
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   price: number;
@@ -41,7 +43,19 @@ export class CreateProductDto {
   @IsBoolean()
   isDeleted?: boolean = true;
 
+  @Type(() => Number)
   @IsOptional()
   @IsNumber()
   stock?: number = 0;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.split(',').map(alt => alt.trim());
+    }
+    return value;
+  })
+  imageAltTexts?: string[];
 }

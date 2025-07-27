@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Product } from './product.entity';
+import { Product } from './dto/entitites/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -8,14 +8,82 @@ import { ProductQueryDto, ProductSortBy } from './dto/product-query.dto';
 import { PaginationMetaDto } from 'src/common/dto/pagination-response.dto';
 import { BaseService } from 'src/common/base/base.service';
 import { slugify } from 'src/common/utils/slugify';
+import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import { ProductImage } from './dto/entitites/product-images.entity';
 
 @Injectable()
 export class ProductsService extends BaseService<Product> {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {
     super(productRepository);
+  }
+
+  async create(
+    createProductDto: CreateProductDto, 
+    images?: Express.Multer.File[]
+  ): Promise<Product> {
+    let productImages: Partial<ProductImage>[] = [];
+    
+    // Upload images if provided
+    if (images && images.length > 0) {
+      const uploadResults = await Promise.all(
+        images.map(image => this.cloudinaryService.uploadImage(image))
+      );
+      
+      // Convert CloudinaryUploadResult to ProductImage format
+      productImages = uploadResults.map((result, index) => ({
+        imageUrl: result.secure_url, // Match the field name in ProductImage entity
+        publicId: result.public_id,
+        altText: `${createProductDto.name} image ${index + 1}`,
+        sortOrder: index,
+        // productId will be set automatically by TypeORM when saving the relation
+      }));
+    }
+
+    // Create product data - TypeORM will handle the cascade save of images
+    const productData = {
+      ...createProductDto,
+      images: productImages,
+    };
+
+    return super.create(productData);
+  }
+
+  async update(
+    id: number, 
+    updateProductDto: UpdateProductDto, 
+    images?: Express.Multer.File[]
+  ) {
+    // If images are provided, we need to handle them separately
+    if (images && images.length > 0) {
+      // Get existing product to manage old images
+      const existingProduct = await this.findOne(id);
+      
+      // Upload new images
+      const uploadResults = await Promise.all(
+        images.map(image => this.cloudinaryService.uploadImage(image))
+      );
+      
+      const newProductImages: Partial<ProductImage>[] = uploadResults.map((result, index) => ({
+        imageUrl: result.secure_url,
+        publicId: result.public_id,
+        altText: `${updateProductDto.name || existingProduct.name} image ${index + 1}`,
+        sortOrder: index,
+      }));
+
+      const updateData = {
+        ...updateProductDto,
+        images: newProductImages,
+      };
+
+      return super.update(id, updateData);
+    }
+
+    // If no images provided, just update other fields
+    return super.update(id, updateProductDto);
   }
 
   async getSearchSuggestions(

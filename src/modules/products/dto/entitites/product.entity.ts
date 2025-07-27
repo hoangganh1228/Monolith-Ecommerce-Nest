@@ -1,6 +1,7 @@
-import { Entity, Column, Index, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Entity, Column, Index, BeforeInsert, BeforeUpdate, OneToMany } from 'typeorm';
 import { BaseEntity } from 'src/common/base/base.entity';
 import { slugify } from 'src/common/utils/slugify';
+import { ProductImage } from './product-images.entity';
 
 @Entity('products')
 @Index(['categoryId', 'isDeleted']) // Composite index cho filter thường dùng
@@ -39,8 +40,16 @@ export class Product extends BaseEntity {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column({ nullable: true })
-  imageUrl: string;
+  @OneToMany(() => ProductImage, (image) => image.product, {
+    cascade: true,
+    eager: true,
+  })
+  images: ProductImage[];
+
+  get thumbnailUrl(): string | null {
+    const thumbnailImage = this.images?.find(img => img.sortOrder === 0);
+    return thumbnailImage?.imageUrl || null;
+  }
 
   // Computed properties
   get isInStock(): boolean {
