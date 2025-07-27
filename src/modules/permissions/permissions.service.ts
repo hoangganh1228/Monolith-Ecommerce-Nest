@@ -23,6 +23,7 @@ export class PermissionsService {
       private readonly userRoleRepository: Repository<UserRole>,
   ) {}
 
+
   async assignPermissionsToRoles(dtos: RoleBasedPermissionDto[], grantedBy: number) {
     for (const dto of dtos) {
       const { resource, roles } = dto;

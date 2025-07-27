@@ -9,10 +9,12 @@ import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
 import { ConfigService } from '@nestjs/config';
 import { ConfigModule } from '@nestjs/config';
+import { Role } from '../roles/entities/role.entity';
+import { UserRole } from '../users/entities/user-role.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Role, UserRole]),
     PassportModule,
     // register the jwt module asynchronously to use the JwtService
     JwtModule.registerAsync({

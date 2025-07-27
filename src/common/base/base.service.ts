@@ -16,8 +16,11 @@ import {
 export abstract class BaseService<T extends BaseEntity> {
   constructor(protected readonly repository: Repository<T>) {}
   async create(dto: DeepPartial<T>): Promise<T> {
+    dto = await this.beforeCreate(dto);
     const entity = this.repository.create(dto);
-    return this.repository.save(entity);
+    const saved = await this.repository.save(entity);
+    await this.afterCreate(entity);
+    return saved
   }
 
   async findOne(id: number): Promise<T> {
@@ -58,7 +61,6 @@ export abstract class BaseService<T extends BaseEntity> {
     dto: DeepPartial<T>,
   ): Promise<{ message: string; affected: number }> {
     await this.findOne(id);
-
     const result: UpdateResult = await this.repository.update(
       id,
       dto as QueryDeepPartialEntity<T>,
@@ -142,4 +144,12 @@ export abstract class BaseService<T extends BaseEntity> {
 
   protected abstract getEntityName(): string;
   protected abstract getEntityAlias(): string;
+
+  protected async beforeCreate(dto: DeepPartial<T>): Promise<DeepPartial<T>> {
+    return dto;
+  }
+
+  protected async afterCreate(entity: T): Promise<void> {}
+
+  
 }

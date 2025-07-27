@@ -14,6 +14,7 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { ResourcesModule } from './modules/resources/resources.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
     OrderModule,
     RolesModule,
     PermissionsModule,
+    ResourcesModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Product } from './product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { DeepPartial, Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductQueryDto, ProductSortBy } from './dto/product-query.dto';
 import { PaginationMetaDto } from 'src/common/dto/pagination-response.dto';
 import { BaseService } from 'src/common/base/base.service';
+import { slugify } from 'src/common/utils/slugify';
 
 @Injectable()
 export class ProductsService extends BaseService<Product> {
@@ -35,6 +36,18 @@ export class ProductsService extends BaseService<Product> {
       .getRawMany();
 
     return products.map((p) => p.name);
+  }
+
+  async findOneBySlug(slug: string): Promise<Product> {
+    const product = await this.productRepository.findOne({
+      where: { slug, isDeleted: true },
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product with slug ${slug} not found`);
+    }
+
+    return product;
   }
 
   async getPopularProducts(limit: number = 10): Promise<Product[]> {
@@ -70,6 +83,12 @@ export class ProductsService extends BaseService<Product> {
     if (query.minPrice !== undefined) {
       queryBuilder.andWhere('product.price >= :minPrice', {
         minPrice: query.minPrice,
+      });
+    }
+
+    if (query.includeInactive) {
+      queryBuilder.andWhere('product.isActive = :isActive', {
+        isActive: true,
       });
     }
 
@@ -114,5 +133,33 @@ export class ProductsService extends BaseService<Product> {
         queryBuilder.orderBy('product.createdAt', sortOrder);
         break;
     }
+  }
+
+  private async generateUniqueSlug(baseSlug: string): Promise<string> {
+    const qb = this.productRepository
+      .createQueryBuilder('p')
+      .select('p.slug', 'slug')
+      .where('p.slug ILIKE :slug', { slug: `${baseSlug}%` });
+
+    const rows = await qb.getRawMany<{ slug: string }>();
+    const taken = new Set(rows.map(r => r.slug));
+
+    if (!taken.has(baseSlug)) return baseSlug;
+
+    let i = 1;
+    let candidate = `${baseSlug}-${i}`;
+    while (taken.has(candidate)) {
+      i++;
+      candidate = `${baseSlug}-${i}`;
+    }
+    return candidate;
+  }
+
+  protected async beforeCreate(dto: DeepPartial<Product>): Promise<DeepPartial<Product>> {
+    if (dto.name) {
+      const baseSlug = slugify(dto.name);
+      dto.slug = await this.generateUniqueSlug(baseSlug);
+    }
+    return dto;
   }
 }

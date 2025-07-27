@@ -23,7 +23,7 @@ const ProductsBaseController = createBaseController<Product, CreateProductDto, U
   ProductQueryDto,
 );
 
-@Controller('products')
+@Controller('admin/products')
 @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @UseInterceptors(LoggingInterceptor)
 export class ProductsController extends ProductsBaseController {

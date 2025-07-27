@@ -20,6 +20,10 @@ export class BaseQueryDto {
   search?: string;
 
   @IsOptional()
+  @Type(() => Boolean)
+  includeInactive?: boolean;
+
+  @IsOptional()
   @IsIn(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC' = 'DESC';
 }

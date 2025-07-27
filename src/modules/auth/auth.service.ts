@@ -5,15 +5,22 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
+import { Role } from '../roles/entities/role.entity';
+import { UserRole } from '../users/entities/user-role.entity';
+import { RoleEnum } from 'src/common/enums/role.enum';
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(UserRole)
+    private readonly userRoleRepository: Repository<UserRole>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -29,7 +36,29 @@ export class AuthService {
       ...dto,
       password: hashedPassword,
     });
-    return this.userRepository.save(user);
+
+    const savedUser = await this.userRepository.save(user);
+    console.log(`Default role for user ${savedUser.email}:`, RoleEnum.USER);
+    const defaultRole = await this.roleRepository.findOne({
+      where: { name: `${RoleEnum.USER}`,  },
+    });
+    console.log("HELLO 3");
+    
+
+    if (!defaultRole) {
+      throw new ConflictException('Default role not found');
+    }
+    console.log("HELLO 2");
+    const userRole = this.userRoleRepository.create({
+      userId: savedUser.id,
+      roleId: defaultRole.id,
+      assignedAt: new Date(),
+      assignedBy: savedUser.id, 
+    });
+
+    await this.userRoleRepository.save(userRole);
+
+    return savedUser
   }
 
   async validateUser(email: string, password: string) {

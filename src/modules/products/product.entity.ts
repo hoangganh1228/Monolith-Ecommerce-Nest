@@ -1,5 +1,6 @@
-import { Entity, Column, Index } from 'typeorm';
+import { Entity, Column, Index, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { BaseEntity } from 'src/common/base/base.entity';
+import { slugify } from 'src/common/utils/slugify';
 
 @Entity('products')
 @Index(['categoryId', 'isDeleted']) // Composite index cho filter thường dùng
@@ -8,8 +9,11 @@ import { BaseEntity } from 'src/common/base/base.entity';
 @Index(['createdAt', 'isDeleted']) // Composite index cho sorting by date
 export class Product extends BaseEntity {
   @Column()
-  @Index() // Single index cho search by name
   name: string;
+
+  @Column()
+  @Index({ unique: true })
+  slug: string;
 
   @Column('text', { nullable: true })
   description: string;
@@ -46,4 +50,12 @@ export class Product extends BaseEntity {
   get isPopular(): boolean {
     return this.viewCount > 100 || this.soldCount > 100;
   }
+
+  // @BeforeInsert()
+  // @BeforeUpdate()
+  // generateSlug() {
+  //   if (this.name) {
+  //     this.slug = slugify(this.name);
+  //   }
+  // }
 }

@@ -1,7 +1,6 @@
 import {
   Column,
   CreateDateColumn,
-  Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -10,7 +9,7 @@ export abstract class BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ default: true })
+  @Column({ default: false })
   isDeleted: boolean;
 
   @CreateDateColumn()
