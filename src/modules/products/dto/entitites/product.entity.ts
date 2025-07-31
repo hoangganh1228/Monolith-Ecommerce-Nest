@@ -1,7 +1,7 @@
-import { Entity, Column, Index, BeforeInsert, BeforeUpdate, OneToMany } from 'typeorm';
+import { Entity, Column, Index, BeforeInsert, BeforeUpdate, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from 'src/common/base/base.entity';
-import { slugify } from 'src/common/utils/slugify';
 import { ProductImage } from './product-images.entity';
+import { Category } from 'src/modules/categories/entities/categories.entity';
 
 @Entity('products')
 @Index(['categoryId', 'isDeleted']) // Composite index cho filter thường dùng
@@ -46,6 +46,10 @@ export class Product extends BaseEntity {
   })
   images: ProductImage[];
 
+  @ManyToOne(() => Category, (category) => category.products, {cascade: true})
+  @JoinColumn({ name: 'categoryId' })
+  category: Category;
+
   get thumbnailUrl(): string | null {
     const thumbnailImage = this.images?.find(img => img.sortOrder === 0);
     return thumbnailImage?.imageUrl || null;
@@ -60,11 +64,4 @@ export class Product extends BaseEntity {
     return this.viewCount > 100 || this.soldCount > 100;
   }
 
-  // @BeforeInsert()
-  // @BeforeUpdate()
-  // generateSlug() {
-  //   if (this.name) {
-  //     this.slug = slugify(this.name);
-  //   }
-  // }
 }

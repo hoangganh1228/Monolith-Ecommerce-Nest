@@ -15,7 +15,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { ResourcesModule } from './modules/resources/resources.module';
-
+import { CategoriesModule } from './modules/categories/categories.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -33,6 +33,7 @@ import { ResourcesModule } from './modules/resources/resources.module';
     RolesModule,
     PermissionsModule,
     ResourcesModule,
+    CategoriesModule, // Ensure CategoriesModule is imported
   ],
   controllers: [AppController],
   providers: [

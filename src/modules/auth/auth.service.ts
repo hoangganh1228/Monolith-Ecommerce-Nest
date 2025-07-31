@@ -42,13 +42,11 @@ export class AuthService {
     const defaultRole = await this.roleRepository.findOne({
       where: { name: `${RoleEnum.USER}`,  },
     });
-    console.log("HELLO 3");
     
 
     if (!defaultRole) {
       throw new ConflictException('Default role not found');
     }
-    console.log("HELLO 2");
     const userRole = this.userRoleRepository.create({
       userId: savedUser.id,
       roleId: defaultRole.id,

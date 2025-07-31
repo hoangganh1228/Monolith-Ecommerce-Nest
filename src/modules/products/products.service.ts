@@ -5,20 +5,35 @@ import { DeepPartial, Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductQueryDto, ProductSortBy } from './dto/product-query.dto';
-import { PaginationMetaDto } from 'src/common/dto/pagination-response.dto';
-import { BaseService } from 'src/common/base/base.service';
+import { PaginationMetaDto, PaginationResponseDto } from 'src/common/dto/pagination-response.dto';
 import { slugify } from 'src/common/utils/slugify';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { ProductImage } from './dto/entitites/product-images.entity';
 
 @Injectable()
-export class ProductsService extends BaseService<Product> {
+export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     private readonly cloudinaryService: CloudinaryService,
   ) {
-    super(productRepository);
+  }
+
+  protected buildPaginationMeta(
+    page: number,
+    limit: number,
+    total: number,
+  ): PaginationMetaDto {
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrevious: page > 1,
+    };
   }
 
   async create(
@@ -33,23 +48,25 @@ export class ProductsService extends BaseService<Product> {
         images.map(image => this.cloudinaryService.uploadImage(image))
       );
       
-      // Convert CloudinaryUploadResult to ProductImage format
       productImages = uploadResults.map((result, index) => ({
         imageUrl: result.secure_url, // Match the field name in ProductImage entity
         publicId: result.public_id,
         altText: `${createProductDto.name} image ${index + 1}`,
         sortOrder: index,
-        // productId will be set automatically by TypeORM when saving the relation
       }));
     }
 
-    // Create product data - TypeORM will handle the cascade save of images
+    
+    const baseSlug = slugify(createProductDto.name);
+    const slug = await this.generateUniqueSlug(baseSlug);
+
     const productData = {
       ...createProductDto,
       images: productImages,
+      slug
     };
 
-    return super.create(productData);
+    return this.productRepository.save(productData);
   }
 
   async update(
@@ -60,8 +77,11 @@ export class ProductsService extends BaseService<Product> {
     // If images are provided, we need to handle them separately
     if (images && images.length > 0) {
       // Get existing product to manage old images
-      const existingProduct = await this.findOne(id);
-      
+      const existingProduct = await this.productRepository.findOne({ where: { id } });
+      if (!existingProduct) {
+        throw new NotFoundException(`Product with ID ${id} not found`);
+      }
+
       // Upload new images
       const uploadResults = await Promise.all(
         images.map(image => this.cloudinaryService.uploadImage(image))
@@ -79,12 +99,32 @@ export class ProductsService extends BaseService<Product> {
         images: newProductImages,
       };
 
-      return super.update(id, updateData);
+      return this.productRepository.save(updateData);
     }
 
     // If no images provided, just update other fields
-    return super.update(id, updateProductDto);
+    return this.productRepository.save(updateProductDto);
   }
+
+  async findAll(query: ProductQueryDto): Promise<PaginationResponseDto<Product>> {
+    const { page = 1, limit = 10 } = query;
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.productRepository.createQueryBuilder('product');
+
+      this.applyCustomFilters(queryBuilder, query);
+  
+      this.applySorting(queryBuilder, query);
+  
+      const total = await queryBuilder.getCount();
+  
+      // Apply pagination
+      const data = await queryBuilder.skip(skip).take(limit).getMany();
+
+      const meta = this.buildPaginationMeta(page, limit, total);
+
+      return { data, meta };
+    }
 
   async getSearchSuggestions(
     keyword: string,
@@ -224,10 +264,7 @@ export class ProductsService extends BaseService<Product> {
   }
 
   protected async beforeCreate(dto: DeepPartial<Product>): Promise<DeepPartial<Product>> {
-    if (dto.name) {
-      const baseSlug = slugify(dto.name);
-      dto.slug = await this.generateUniqueSlug(baseSlug);
-    }
+    
     return dto;
   }
 }
