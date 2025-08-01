@@ -26,10 +26,10 @@ export class CreateProductDto {
   @Min(0)
   price: number;
 
-  @IsOptional()
-  @IsUrl()
-  imageUrl?: string;
-
+  // @IsOptional()
+  // @IsUrl()
+  // imageUrl?: string;
+  @Type(() => Number)
   @IsOptional()
   @IsNumber()
   categoryId?: number;

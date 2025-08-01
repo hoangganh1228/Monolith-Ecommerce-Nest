@@ -25,7 +25,7 @@ export class RolesController extends BaseController<Role, CreateRoleDto, UpdateR
   }
 
   @Patch(':id')
-  async update(
+    async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateRoleDto: UpdateRoleDto
   ) {

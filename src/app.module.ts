@@ -16,6 +16,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { ResourcesModule } from './modules/resources/resources.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { NavigationModule } from './modules/navigation/navigation.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -33,7 +34,8 @@ import { CategoriesModule } from './modules/categories/categories.module';
     RolesModule,
     PermissionsModule,
     ResourcesModule,
-    CategoriesModule, // Ensure CategoriesModule is imported
+    CategoriesModule,
+    NavigationModule, // Ensure CategoriesModule is imported
   ],
   controllers: [AppController],
   providers: [

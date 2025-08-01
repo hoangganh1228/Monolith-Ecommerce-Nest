@@ -4,7 +4,6 @@ export class ProductResponseDto {
   description: string;
   price: number;
   stock: number;
-  imageUrl: string;
   categoryId: number;
   tags: string[];
   isDeleted: boolean;

@@ -1,3 +1,4 @@
+import { CategoriesService } from './../categories/categories.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Product } from './dto/entitites/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,6 +17,7 @@ export class ProductsService {
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly categoriesService: CategoriesService,
   ) {
   }
 
@@ -41,7 +43,6 @@ export class ProductsService {
     images?: Express.Multer.File[]
   ): Promise<Product> {
     let productImages: Partial<ProductImage>[] = [];
-    
     // Upload images if provided
     if (images && images.length > 0) {
       const uploadResults = await Promise.all(
@@ -55,8 +56,14 @@ export class ProductsService {
         sortOrder: index,
       }));
     }
-
     
+    if(createProductDto.categoryId) {
+      const category = await this.categoriesService.findOne(createProductDto.categoryId);
+      if (!category) {
+        throw new NotFoundException(`Category with ID ${createProductDto.categoryId} not found`);
+      }
+    }
+
     const baseSlug = slugify(createProductDto.name);
     const slug = await this.generateUniqueSlug(baseSlug);
 
@@ -110,7 +117,10 @@ export class ProductsService {
     const { page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
-    const queryBuilder = this.productRepository.createQueryBuilder('product');
+    const queryBuilder = this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.images', 'image');
+
 
       this.applyCustomFilters(queryBuilder, query);
   
@@ -133,6 +143,7 @@ export class ProductsService {
     if (!keyword?.trim()) {
       return [];
     }
+    
 
     const products = await this.productRepository
       .createQueryBuilder('product')
@@ -262,9 +273,5 @@ export class ProductsService {
     }
     return candidate;
   }
-
-  protected async beforeCreate(dto: DeepPartial<Product>): Promise<DeepPartial<Product>> {
-    
-    return dto;
-  }
+  
 }

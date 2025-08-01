@@ -8,9 +8,10 @@ import { ProductsController } from './controllers/admin-products.controller';
 import { PublicProductsController } from './controllers/products.controller';
 import { ProductImage } from './dto/entitites/product-images.entity';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import { CategoriesModule } from '../categories/categories.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, ProductImage]), PermissionsModule],
+  imports: [TypeOrmModule.forFeature([Product, ProductImage]), PermissionsModule, CategoriesModule],
   controllers: [ProductsController, PublicProductsController],
   providers: [ProductsService, CloudinaryService],
 })

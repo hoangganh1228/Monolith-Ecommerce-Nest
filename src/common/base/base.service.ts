@@ -25,7 +25,7 @@ export abstract class BaseService<T extends BaseEntity> {
 
   async findOne(id: number): Promise<T> {
     const entity = await this.repository.findOne({
-      where: { isDeleted: true, id } as any,
+      where: { isDeleted: false, id } as any,
     });
 
     if (!entity)
